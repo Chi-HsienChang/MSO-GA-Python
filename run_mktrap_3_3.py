@@ -1,6 +1,9 @@
 import random
 import sys
 from pdb import set_trace
+import networkx as nx
+import matplotlib.pyplot as plt
+import os
 
 # 定義問題相關的參數
 ell = 6  # 基因數量
@@ -87,7 +90,7 @@ def mk_trap_fitness(ch):
         if fitness == 2:
             population_fitness_dict.setdefault(str(ch), fitness)
             result()
-            print("找到最佳解")
+            print("第 {} gen 找到最佳解".format(generation))
             sys.exit() 
         return fitness
 
@@ -195,7 +198,7 @@ for generation in range(num_generations):
 
     print("arrow_matrix", arrow_matrix)
 
-    # build MSO
+    # plot arrow graph
 
     one_layer_arrow = []
     for j in range(ell):
@@ -210,13 +213,37 @@ for generation in range(num_generations):
 
     print("one_layer_arrow", one_layer_arrow)
 
+    def plot_tree(j, depth, one_layer_arrow):
+        G = nx.DiGraph()
+        for k in one_layer_arrow[j]:
+            # des = str(j) + "'"*depth
+            # sou = str(k) + "'"*(depth+1)
+            des = str(j) 
+            sou = str(k) 
+            G.add_edge(sou, des)
+        # 計算節點的位置
+        pos = nx.spring_layout(G)
+            # 繪製圖形
+        node_colors = ['orange' if node == des else 'skyblue' for node in G.nodes()]
+        nx.draw(G, pos, with_labels=True, node_size=2000, node_color=node_colors, font_size=10, font_color='black', arrows=True)
+
+        folder_path = f"./img/gen{generation}"
+        os.makedirs(folder_path, exist_ok=True) 
+
+        plt.savefig(f"{folder_path}/tree_structure_gen{generation}_des{j}.png")
+           
+            # 存儲圖片
+        # plt.savefig("./img/tree_structure_gen{}_des{}.png".format(generation, depth))
+        plt.clf()
+
+    depth = 0
+    for j in range(ell): 
+        plot_tree(j, depth, one_layer_arrow)
+
+           
+    # build MSO
 
 
 
-            
-
-
-    
-    
 # 找出最佳解
 result()
