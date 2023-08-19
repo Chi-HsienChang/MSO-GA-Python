@@ -301,27 +301,12 @@ for generation in range(num_generations):
 
     print("MSO: ", MSO_list)
 
-
     if MSO_list != SO_list:
         print(Color.RED + "找到了SO與MSO不同的case了！！" + Color.END)
 
-      
-                
+    # 用得到的 MSO 從 fitness 最好的去蓋
+    
 
-
-
-
-
-
-
-
-        
-
-        
-
-
-
-
-
-# 找出最佳解
+# 找出的次佳解
 result()
+print("沒有找到最佳解")
