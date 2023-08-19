@@ -5,10 +5,23 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import os
 
+# 定義 ANSI 轉義碼
+class Color:
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
 # 定義問題相關的參數
 ell = 6  # 基因數量
-population_size = 10  # 基因組個數
-num_generations = 10 # 代數
+population_size = 5  # 基因組個數
+num_generations = 5 # 代數
 
 first_gen = True
 NFE = 0
@@ -120,21 +133,21 @@ NFE = 0
 for generation in range(num_generations):
     if first_gen:
         for i in range(population_size):
-            GHC(population[i])
+            # GHC(population[i])
             population_fitness_dict.setdefault(str(population[i]), mk_trap_fitness(population[i]))
             first_gen = False
     else:
         flag = True
         while flag:
             new_ch = [random.randint(0, 1) for _ in range(ell)]
-            GHC(new_ch)
+            # GHC(new_ch)
             ch_count = len(population_fitness_dict)
             population_fitness_dict.setdefault(str(new_ch), mk_trap_fitness(new_ch))
             if len(population_fitness_dict) == ch_count + 1:
                 break
     
     
-    print("第"+str(generation+1)+" gen"+"已出現"+str(len(population_fitness_dict))+"條不同的ch")
+    print("第"+str(generation+1)+" gen "+"已出現 "+str(len(population_fitness_dict))+" 條不同的ch")
     
     population_fitness_list = list(population_fitness_dict.items())
 
@@ -213,7 +226,7 @@ for generation in range(num_generations):
 
     print("one_layer_arrow", one_layer_arrow)
 
-    def plot_tree(j, depth, one_layer_arrow):
+    def plot_tree(j, one_layer_arrow):
         G = nx.DiGraph()
         for k in one_layer_arrow[j]:
             # des = str(j) + "'"*depth
@@ -238,10 +251,75 @@ for generation in range(num_generations):
 
     depth = 0
     for j in range(ell): 
-        plot_tree(j, depth, one_layer_arrow)
+        plot_tree(j, one_layer_arrow)
 
-           
+    # build SO
+    SO_list = []
+    for i in range(ell):
+        SO_set = set()
+        SO_set.add(i)
+
+        def next_arrow(des, current_source_arrow):
+            if len(current_source_arrow) == 0:
+                return
+            
+            count = len(one_layer_arrow[des])
+            for sou in one_layer_arrow[des]:
+                if sou not in SO_set:
+                    SO_set.add(sou)
+                else:
+                    count -= 1
+            
+            if count == 0:
+                return
+
+            for next_des in current_source_arrow:
+                next_arrow(next_des, one_layer_arrow[next_des])
+
+        next_arrow(i, one_layer_arrow[i])
+        SO_list.append(SO_set)
+
+    print("SO: ", SO_list)
+
+    # Test SO & MSO
+    # SO_list = [{0, 1, 2 , 4}, {1, 2, 3}, {1, 2, 3}, {3}, {0, 4}, {0, 3, 4, 5}]
+    # print("SO: ", SO_list)
+
     # build MSO
+    MSO_list = []
+    for des in range(ell):
+        target_index = 10000
+        min_len = 10000
+        for i in range(ell):
+            if des in SO_list[i]:
+                SO_len = len(SO_list[i])
+                if SO_len < min_len: # 還沒處理相同大小的情況
+                    target_index = i
+                    min_len = len(SO_list[i])
+        
+        MSO_list.append(SO_list[target_index]) 
+
+    print("MSO: ", MSO_list)
+
+
+    if MSO_list != SO_list:
+        print(Color.RED + "找到了SO與MSO不同的case了！！" + Color.END)
+
+      
+                
+
+
+
+
+
+
+
+
+        
+
+        
+
+
 
 
 
